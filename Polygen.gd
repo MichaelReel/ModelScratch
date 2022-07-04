@@ -32,9 +32,14 @@ func create_geometry() -> void:
 	var b := Vector3(0.5,1.0,0.5)
 	var width := 0.2
 	add_line(a, b, width)
+	a = b
+	b = Vector3(0.0, 2.0, 0.0)
+	add_line(a, b, width)
+	
 
 
 func add_line(start: Vector3, end: Vector3, width: float) -> void:
+	var i : int = vertices.size()
 	vertices.append_array([
 		# These will need adjustment to account for line tilt, etc
 		start + (Vector3.LEFT * width),
@@ -47,10 +52,10 @@ func add_line(start: Vector3, end: Vector3, width: float) -> void:
 		end + (Vector3.BACK * width),
 	])
 	triangles.append_array([
-		0, 1, 5, 0, 5, 4, # Quad between LEFT and FORWARD
-		1, 2, 6, 1, 6, 5, # Quad between FORWARD and RIGHT
-		2, 3, 7, 2, 7, 6, # Quad between RIGHT and BACK
-		3, 0, 4, 3, 4, 7, # Quad between BACK and LEFT
+		i + 0, i + 1, i + 5, i + 0, i + 5, i + 4, # Quad between LEFT and FORWARD
+		i + 1, i + 2, i + 6, i + 1, i + 6, i + 5, # Quad between FORWARD and RIGHT
+		i + 2, i + 3, i + 7, i + 2, i + 7, i + 6, # Quad between RIGHT and BACK
+		i + 3, i + 0, i + 4, i + 3, i + 4, i + 7, # Quad between BACK and LEFT
 	])
 	uvs.append_array([
 		Vector2.ZERO, Vector2.RIGHT, Vector2.ZERO, Vector2.RIGHT,

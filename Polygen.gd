@@ -28,41 +28,104 @@ func _ready() -> void:
 
 
 func create_geometry() -> void:
-	var a := Vector3(0,0,0)
-	var b := Vector3(0.5,1.0,0.5)
+	var a := Vector3(0, -1.0, 0)
+	var b := Vector3(0, 1.0, 0)
 	var width := 0.2
-	add_line(a, b, width)
-	a = b
-	b = Vector3(0.0, 2.0, 0.0)
-	add_line(a, b, width)
 	
+	var root = create_base(a, width)
+	
+	var branch_length = 1.0
+	var branch_spread = 1.0
+	var sub_branches = 4
+	var limit = 3
+	
+	create_branching(root, b, width, branch_length, branch_spread, sub_branches, limit)
 
 
-func add_line(start: Vector3, end: Vector3, width: float) -> void:
-	var i : int = vertices.size()
+func create_base(root_point: Vector3, base_width: float) -> PoolIntArray:
 	vertices.append_array([
-		# These will need adjustment to account for line tilt, etc
-		start + (Vector3.LEFT * width),
-		start + (Vector3.FORWARD * width), 
-		start + (Vector3.RIGHT * width),
-		start + (Vector3.BACK * width),
-		end + (Vector3.LEFT * width),
-		end + (Vector3.FORWARD * width), 
-		end + (Vector3.RIGHT * width),
-		end + (Vector3.BACK * width),
+		root_point + (Vector3.DOWN * base_width),
+		root_point + (Vector3.LEFT * base_width),
+		root_point + (Vector3.FORWARD * base_width), 
+		root_point + (Vector3.RIGHT * base_width),
+		root_point + (Vector3.BACK * base_width),
 	])
 	triangles.append_array([
-		i + 0, i + 1, i + 5, i + 0, i + 5, i + 4, # Quad between LEFT and FORWARD
-		i + 1, i + 2, i + 6, i + 1, i + 6, i + 5, # Quad between FORWARD and RIGHT
-		i + 2, i + 3, i + 7, i + 2, i + 7, i + 6, # Quad between RIGHT and BACK
-		i + 3, i + 0, i + 4, i + 3, i + 4, i + 7, # Quad between BACK and LEFT
+		0, 2, 1,
+		0, 3, 2,
+		0, 4, 3,
+		0, 1, 4,
 	])
 	uvs.append_array([
-		Vector2.ZERO, Vector2.RIGHT, Vector2.ZERO, Vector2.RIGHT,
-		Vector2.DOWN, Vector2.ONE, Vector2.DOWN, Vector2.ONE,
+		(Vector2.ONE / 2.0), Vector2.ZERO, Vector2.RIGHT, Vector2.DOWN, Vector2.ONE,
 	])
 	normals.append_array([
-		# These will need adjusted just like the vertices
-		Vector3.LEFT, Vector3.FORWARD, Vector3.RIGHT, Vector3.BACK,
+		Vector3.DOWN, Vector3.LEFT, Vector3.FORWARD, Vector3.RIGHT, Vector3.BACK,
+	])
+	return PoolIntArray([1, 2, 3, 4])
+
+
+func create_branching(
+	base_vertices: PoolIntArray,
+	bifurication: Vector3,
+	width: float,
+	length: float,
+	spread: float,
+	sub_branches: int,
+	limit: int
+) -> void:
+	if limit <= 0:
+		return
+
+	var sub_branch_rot := Vector3.LEFT * spread
+	var branch_rot_delta := 2.0 * PI / sub_branches
+	for _branch_index in range(sub_branches):
+		if limit <= 1:
+			create_twig(base_vertices, bifurication, width)
+			continue
+			
+		var branch_root := create_branch(base_vertices, bifurication, width)
+		var sub_bifurication := bifurication + Vector3(0, length, 0) + sub_branch_rot
+		sub_branch_rot = sub_branch_rot.rotated(Vector3.DOWN, branch_rot_delta)
+		create_branching(branch_root, sub_bifurication, width, length, spread, sub_branches, limit - 1)
+
+
+func create_branch(base_vertices: PoolIntArray, bifurication: Vector3, width: float) -> PoolIntArray:
+	var i : int = vertices.size()
+	vertices.append_array([
+		# These should probably be adjusted to account for line tilt, etc
+		bifurication + (Vector3.LEFT * width),
+		bifurication + (Vector3.FORWARD * width), 
+		bifurication + (Vector3.RIGHT * width),
+		bifurication + (Vector3.BACK * width),
+	])
+	# We're not really giving much head to rotation here, should be okay for the moment
+	triangles.append_array([
+		base_vertices[0], base_vertices[1], i + 1, base_vertices[0], i + 1, i + 0, # Quad between LEFT and FORWARD
+		base_vertices[1], base_vertices[2], i + 2, base_vertices[1], i + 2, i + 1, # Quad between FORWARD and RIGHT
+		base_vertices[2], base_vertices[3], i + 3, base_vertices[2], i + 3, i + 2, # Quad between RIGHT and BACK
+		base_vertices[3], base_vertices[0], i + 0, base_vertices[3], i + 0, i + 3, # Quad between BACK and LEFT
+	])
+	# These are not going to be make sense for now
+	uvs.append_array([
+		Vector2.DOWN, Vector2.ONE, Vector2.ZERO, Vector2.RIGHT,
+	])
+	normals.append_array([
 		Vector3.LEFT, Vector3.FORWARD, Vector3.RIGHT, Vector3.BACK,
 	])
+	return PoolIntArray(range(i, i + 4))
+
+
+func create_twig(base_vertices: PoolIntArray, bifurication: Vector3, width: float) -> void:
+	var i : int = vertices.size()
+	vertices.append_array([bifurication])
+	# We're not really giving much head to rotation here, should be okay for the moment
+	triangles.append_array([
+		base_vertices[0], base_vertices[1], i, # Tri between LEFT and FORWARD
+		base_vertices[1], base_vertices[2], i, # Tri between FORWARD and RIGHT
+		base_vertices[2], base_vertices[3], i, # Tri between RIGHT and BACK
+		base_vertices[3], base_vertices[0], i, # Tri between BACK and LEFT
+	])
+	# These are not going to be make any sense for now
+	uvs.append_array([Vector2.DOWN])
+	normals.append_array([Vector3.UP])

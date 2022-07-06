@@ -8,6 +8,16 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "MeshInstance",
+"class": "TreeMeshGenerator",
+"language": "GDScript",
+"path": "res://Polygen.gd"
+} ]
+_global_script_class_icons={
+"TreeMeshGenerator": ""
+}
+
 [application]
 
 config/name="ModelScratch"

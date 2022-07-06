@@ -1,23 +1,34 @@
 tool
+class_name TreeMeshGenerator
 extends MeshInstance
+# Tree shaped polygon mesh generator
+# Define a form of tree/plant shape 
+
+
+const LINE_END_OFFSETS := PoolVector3Array([
+	Vector3.LEFT, Vector3.FORWARD, Vector3.RIGHT, Vector3.BACK
+])
+
+export (int) var noise_seed : int = 0 setget _set_seed
+export (Material) var apply_material setget _set_apply_material
+export (float) var branch_width_start := 0.2 setget _set_branch_width_start
+export (float) var branch_length_start := 1.0 setget _set_branch_length_start
+export (float) var branch_spread_start := 1.0 setget _set_branch_spread_start
+export (int) var sub_branches_max := 4 setget _set_sub_branches_max
+export (int) var sub_branch_limit := 3 setget _set_sub_branch_limit
+
 
 var vertices = PoolVector3Array()
 var uvs = PoolVector2Array()
 var normals = PoolVector3Array()
 var triangles = PoolIntArray()
 
-const LINE_END_OFFSETS := PoolVector3Array([
-	Vector3.LEFT, Vector3.FORWARD, Vector3.RIGHT, Vector3.BACK
-])
-
-
-func _enter_tree() -> void:
-	request_ready()
 
 func _ready() -> void:
 	create_geometry()
 	
-	mesh = ArrayMesh.new()
+	mesh.clear_surfaces()
+#	mesh = ArrayMesh.new()
 	var arr = []
 	arr.resize(ArrayMesh.ARRAY_MAX)
 	
@@ -25,22 +36,30 @@ func _ready() -> void:
 	arr[Mesh.ARRAY_INDEX] = triangles
 	
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
+	mesh.surface_set_material(0, self.apply_material)
+
+
+#func _enter_tree() -> void:
+#	request_ready()
 
 
 func create_geometry() -> void:
-	var a := Vector3(0, -1.0, 0)
-	var b := Vector3(0, 1.0, 0)
-	var width := 0.2
+	var sub_ground := Vector3.DOWN
+	var first_bifurication := Vector3(0, branch_length_start, 0)
 	
-	var root = create_base(a, width)
+	var root = create_base(sub_ground, branch_width_start)
 	
-	var branch_length := 1.0
-	var branch_spread := 1.0
-	var sub_branches := 4
-	var limit := 3
 	var uv_switch := false
-	
-	create_branching(root, b, width, branch_length, branch_spread, sub_branches, limit, uv_switch)
+	create_branching(
+		root,
+		first_bifurication,
+		branch_width_start,
+		branch_length_start,
+		branch_spread_start,
+		sub_branches_max,
+		sub_branch_limit,
+		uv_switch
+	)
 
 
 func create_base(root_point: Vector3, base_width: float) -> PoolIntArray:
@@ -132,3 +151,38 @@ func create_twig(base_vertices: PoolIntArray, bifurication: Vector3) -> void:
 	# These are not going to be make any sense for now
 	uvs.append_array([Vector2.DOWN])
 	normals.append_array([Vector3.UP])
+
+
+func _set_seed(value: int) -> void:
+	noise_seed = value
+	request_ready()
+
+
+func _set_apply_material(value: Material) -> void:
+	apply_material = value
+	request_ready()
+
+
+func _set_branch_width_start(value: float) -> void:
+	branch_width_start = value
+	request_ready()
+
+
+func _set_branch_length_start(value: float) -> void:
+	branch_length_start = value
+	request_ready()
+
+
+func _set_branch_spread_start(value: float) -> void:
+	branch_spread_start = value
+	request_ready()
+
+
+func _set_sub_branches_max(value: int) -> void:
+	sub_branches_max = value
+	request_ready()
+
+
+func _set_sub_branch_limit(value: int) -> void:
+	sub_branch_limit = value
+	request_ready()

@@ -25,9 +25,21 @@ var triangles = PoolIntArray()
 
 
 func _ready() -> void:
+	create_and_apply_new_mesh_data()
+
+
+func create_and_apply_new_mesh_data() -> void:
+	if mesh:
+		mesh.clear_surfaces()
+	else:
+		mesh = ArrayMesh.new()
+	vertices.resize(0)
+	uvs.resize(0)
+	normals.resize(0)
+	triangles.resize(0)
+
 	create_geometry()
 	
-	mesh.clear_surfaces()
 #	mesh = ArrayMesh.new()
 	var arr = []
 	arr.resize(ArrayMesh.ARRAY_MAX)
@@ -39,11 +51,8 @@ func _ready() -> void:
 	mesh.surface_set_material(0, self.apply_material)
 
 
-#func _enter_tree() -> void:
-#	request_ready()
-
-
 func create_geometry() -> void:
+	print("Lets geometry!")
 	var sub_ground := Vector3.DOWN
 	var first_bifurication := Vector3(0, branch_length_start, 0)
 	
@@ -155,34 +164,34 @@ func create_twig(base_vertices: PoolIntArray, bifurication: Vector3) -> void:
 
 func _set_seed(value: int) -> void:
 	noise_seed = value
-	request_ready()
+	create_and_apply_new_mesh_data()
 
 
 func _set_apply_material(value: Material) -> void:
 	apply_material = value
-	request_ready()
+	create_and_apply_new_mesh_data()
 
 
 func _set_branch_width_start(value: float) -> void:
 	branch_width_start = value
-	request_ready()
+	create_and_apply_new_mesh_data()
 
 
 func _set_branch_length_start(value: float) -> void:
 	branch_length_start = value
-	request_ready()
+	create_and_apply_new_mesh_data()
 
 
 func _set_branch_spread_start(value: float) -> void:
 	branch_spread_start = value
-	request_ready()
+	create_and_apply_new_mesh_data()
 
 
 func _set_sub_branches_max(value: int) -> void:
 	sub_branches_max = value
-	request_ready()
+	create_and_apply_new_mesh_data()
 
 
 func _set_sub_branch_limit(value: int) -> void:
 	sub_branch_limit = value
-	request_ready()
+	create_and_apply_new_mesh_data()

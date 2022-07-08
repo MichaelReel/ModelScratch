@@ -13,7 +13,7 @@ export (int) var noise_seed : int = 0 setget _set_seed
 export (Material) var apply_material setget _set_apply_material
 export (float) var branch_width_start := 0.2 setget _set_branch_width_start
 export (float) var branch_length_start := 1.0 setget _set_branch_length_start
-export (float) var branch_spread_start := 1.0 setget _set_branch_spread_start
+export (float) var branch_spread_start := 45.0 setget _set_branch_spread_start
 export (int) var sub_branches_max := 4 setget _set_sub_branches_max
 export (int) var sub_branch_limit := 3 setget _set_sub_branch_limit
 
@@ -29,18 +29,10 @@ func _ready() -> void:
 
 
 func create_and_apply_new_mesh_data() -> void:
-	if mesh:
-		mesh.clear_surfaces()
-	else:
-		mesh = ArrayMesh.new()
-	vertices.resize(0)
-	uvs.resize(0)
-	normals.resize(0)
-	triangles.resize(0)
+	reset_geometry()
 
 	create_geometry()
-	
-#	mesh = ArrayMesh.new()
+
 	var arr = []
 	arr.resize(ArrayMesh.ARRAY_MAX)
 	
@@ -51,8 +43,19 @@ func create_and_apply_new_mesh_data() -> void:
 	mesh.surface_set_material(0, self.apply_material)
 
 
+func reset_geometry() -> void:
+	if mesh:
+		mesh.clear_surfaces()
+	else:
+		mesh = ArrayMesh.new()
+
+	vertices.resize(0)
+	uvs.resize(0)
+	normals.resize(0)
+	triangles.resize(0)
+
+
 func create_geometry() -> void:
-	print("Lets geometry!")
 	var sub_ground := Vector3.DOWN
 	var first_bifurication := Vector3(0, branch_length_start, 0)
 	
@@ -60,6 +63,7 @@ func create_geometry() -> void:
 	
 	var uv_switch := false
 	create_branching(
+		sub_ground,
 		root,
 		first_bifurication,
 		branch_width_start,
@@ -95,6 +99,7 @@ func create_base(root_point: Vector3, base_width: float) -> PoolIntArray:
 
 
 func create_branching(
+	base_vector: Vector3,
 	base_vertices: PoolIntArray,
 	bifurication: Vector3,
 	width: float,
@@ -107,7 +112,7 @@ func create_branching(
 	if limit <= 0:
 		return
 
-	var sub_branch_rot := Vector3.LEFT * spread
+	var sub_branch_rot := Vector3(0, length, 0).rotated(Vector3.LEFT, deg2rad(spread))
 	var branch_rot_delta := 2.0 * PI / sub_branches
 	for _branch_index in range(sub_branches):
 		if limit <= 1:
@@ -115,9 +120,9 @@ func create_branching(
 			continue
 			
 		var branch_root := create_branch(base_vertices, bifurication, width, uv_switch)
-		var sub_bifurication := bifurication + Vector3(0, length, 0) + sub_branch_rot
+		var sub_bifurication := bifurication + sub_branch_rot
 		sub_branch_rot = sub_branch_rot.rotated(Vector3.DOWN, branch_rot_delta)
-		create_branching(branch_root, sub_bifurication, width, length, spread, sub_branches, limit - 1, !uv_switch)
+		create_branching(bifurication, branch_root, sub_bifurication, width, length, spread, sub_branches, limit - 1, !uv_switch)
 
 
 func create_branch(base_vertices: PoolIntArray, bifurication: Vector3, width: float, uv_switch: bool) -> PoolIntArray:

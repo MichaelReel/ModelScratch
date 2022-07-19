@@ -9,10 +9,10 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "MeshInstance",
+"base": "Reference",
 "class": "TreeMeshGenerator",
 "language": "GDScript",
-"path": "res://Polygen.gd"
+"path": "res://Polytree_Experiment/Polygen.gd"
 } ]
 _global_script_class_icons={
 "TreeMeshGenerator": ""
@@ -21,7 +21,7 @@ _global_script_class_icons={
 [application]
 
 config/name="ModelScratch"
-run/main_scene="res://Viewer.tscn"
+run/main_scene="res://Polytree_Experiment/Viewer.tscn"
 config/icon="res://icon.png"
 
 [physics]

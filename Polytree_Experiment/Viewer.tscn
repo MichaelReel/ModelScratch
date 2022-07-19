@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=2]
 
-[ext_resource path="res://Polygen.tscn" type="PackedScene" id=1]
-[ext_resource path="res://green_material.tres" type="Material" id=2]
+[ext_resource path="res://Polytree_Experiment/Polygen.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Polytree_Experiment/green_material.tres" type="Material" id=2]
 
 [sub_resource type="ArrayMesh" id=5]
 surfaces/0 = {

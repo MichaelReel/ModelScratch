@@ -13,9 +13,15 @@ _global_script_classes=[ {
 "class": "TreeMeshGenerator",
 "language": "GDScript",
 "path": "res://Polytree_Experiment/Polygen.gd"
+}, {
+"base": "Skeleton",
+"class": "TreeSkeletonGenerator",
+"language": "GDScript",
+"path": "res://Skeleton_Experiment/Skelygen.gd"
 } ]
 _global_script_class_icons={
-"TreeMeshGenerator": ""
+"TreeMeshGenerator": "",
+"TreeSkeletonGenerator": ""
 }
 
 [application]
